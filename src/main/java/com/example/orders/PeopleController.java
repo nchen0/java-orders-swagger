@@ -6,6 +6,7 @@ import com.example.orders.models.Order;
 import com.example.orders.repository.AgentRepository;
 import com.example.orders.repository.CustomerRepository;
 import com.example.orders.repository.OrderRepository;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Api(value = "People Controller Application", description = "The Agent/Customer/Order Application")
 @RestController
 @RequestMapping(path = {}, produces = MediaType.APPLICATION_JSON_VALUE)
 public class PeopleController {
@@ -30,6 +32,13 @@ public class PeopleController {
 
     // Day 2 Stuff:
     // GET /customers - returns all the customer
+    @ApiOperation(value = "List All Customers", response = List.class) // If we don't want to use the default Swagger stuff
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully retrieved list"),
+            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    })
     @GetMapping("/customers")
     public List<Customer> findCustomers() {
         return customerrepos.findAll();
@@ -48,8 +57,10 @@ public class PeopleController {
     }
 
     // GET /customers/custcode/{custcode}
+    // What happens if we have a parameter, what if we want to customize that information swagger is returning back?
+    @ApiOperation(value = "Customer based off of customer id", response = Customer.class) // This will tell us this particular message.
     @GetMapping("/customers/custcode/{custcode}")
-    public Customer findCustId(@PathVariable long custcode) {
+    public Customer findCustId(@ApiParam(value = "This is the customer you seek", required = true) @PathVariable long custcode) { // This is how you document a specific parameter.@PathVariable long custcode) {
         var foundCust = customerrepos.findById(custcode);
         if (foundCust.isPresent()) {
             return foundCust.get();
